@@ -1,5 +1,9 @@
 const express = require('express')
+const morgan = require('morgan')
 const app = express()
+
+app.use(express.json())
+app.use(morgan(':method :url :body'))
 
 let persons = [
     { 
@@ -24,9 +28,13 @@ let persons = [
     }
 ]
 
+app.get('/', function (req, res) {
+  res.send('hello, world!')
+})
 
 
 app.get('/api/persons',(request, response)=>{
+
     response.json(persons)
 })
 
@@ -55,6 +63,37 @@ app.delete('/api/persons/:id',(request,response)=>{
    persons = persons.filter(person=>person.id !== id)
    response.status(204).end()
 })
+
+
+
+app.post('/api/persons',(request, response)=>{
+  const id = Math.floor(Math.random()*20)
+  const body = request.body
+
+  const test = persons.map(n=>n.name)
+
+  if(!body.name || !body.number){
+    return response.status(400).json({
+      error:"content missing"
+    })
+  }
+  
+  if(test.includes(body.name)){
+    return response.status(400).json({
+      error:"aaaaaaaaa"
+    })
+  }
+
+  const person = {
+      id:id,
+      name:body.name,
+      number:body.number,
+  }
+  persons = persons.concat(person)
+  response.json(person)
+  morgan.token('body', request => JSON.stringify(request.body))
+})
+
 
 const PORT = 3001
 
